@@ -90,6 +90,32 @@ namespace FiyiStack.Library.MicrosoftSQLServer
             }
             catch (Exception) { throw; }
         }
+        
+        public List<string> GetAllStoredProcedures(string ConnectionString)
+        {
+            string QueryToTakeAllSPsNames = "SELECT SPECIFIC_NAME FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE='PROCEDURE'";
+
+            List<string> SPs = [];
+
+            // Crear conexión y comando SQL
+            using SqlConnection connection = new(ConnectionString);
+            SqlCommand command = new(QueryToTakeAllSPsNames, connection);
+
+            try
+            {
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    SPs.Add(reader["SPECIFIC_NAME"].ToString());
+                }
+                reader.Close();
+            }
+            catch (Exception) { throw; }
+
+            return SPs;
+        }
         #endregion
     }
 }

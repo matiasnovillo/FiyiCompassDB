@@ -199,6 +199,67 @@ La tabla a analizar, {txtDBNameAAnalizar.Text}, contiene un total de {lstTableAA
                 }
             }
             #endregion
+
+            #region PROCEDIMIENTOS ALMACENADOS
+            txtResult.Text += $@"
+
+3. PROCEDIMIENTOS ALMACENADOS FALTANTES
+
+";
+
+            //Obtener SPs de la BD Pivote
+            List<string> lstSPsPivote = new FiyiStack.Library.MicrosoftSQLServer.StoredProcedure()
+                .GetAllStoredProcedures(txtConnectionStringBDPivote.Text);
+
+            //Obtener SPs de la BD a analizar
+            List<string> lstSPsAAnalizar = new FiyiStack.Library.MicrosoftSQLServer.StoredProcedure()
+                .GetAllStoredProcedures(txtConnectionStringBDAAnalizar.Text);
+
+            List<string> lstSPsFaltantes = [];
+
+            foreach (string SPPivote in lstSPsPivote)
+            {
+                bool encontrado = false;
+                foreach (string SPsAAnalizar in lstSPsAAnalizar)
+                {
+                    // Compara los registros
+                    if (SPPivote == SPsAAnalizar)
+                    {
+                        encontrado = true;
+                        break;
+                    }
+                }
+                // Si el registro no se encuentra en la segunda lista, añádelo a las filas faltantes
+                if (!encontrado)
+                {
+                    lstSPsFaltantes.Add(SPPivote);
+                }
+            }
+
+            txtResult.Text += $@"La BD pivote, {txtDBNamePivote.Text}, contiene un total de {lstSPsPivote.Count} SPs.
+La BD a analizar, {txtDBNameAAnalizar.Text}, contiene un total de {lstSPsAAnalizar.Count} SPs.
+
+";
+
+            if (lstSPsFaltantes.Count > 0)
+            {
+                txtResult.Text += $@"Los siguientes SPs no existen en la base de datos a analizar:
+
+";
+                foreach (string sp in lstSPsFaltantes)
+                {
+                    txtResult.Text += $@"{sp}
+
+";
+                }
+            }
+            else
+            {
+                txtResult.Text += $@"Todas los SPs de la base de datos pivote existen en la base de datos a analizar
+
+";
+            }
+            #endregion
         }
 
         private void btnLocalHost_Click(object sender, EventArgs e)
